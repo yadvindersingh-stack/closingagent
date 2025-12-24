@@ -1,6 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase-admin';
 import { buildRequisitionHtml } from '@/lib/requisition-html';
+import crypto from 'crypto';
+import { Resend } from "resend";
+const resend = new Resend(process.env.RESEND_API_KEY!);
+
+function randomToken() {
+  return crypto.randomBytes(24).toString('hex'); // 48 chars
+}
+function sha256(s: string) {
+  return crypto.createHash('sha256').update(s).digest('hex');
+}
 
 export async function POST(req: NextRequest) {
   try {
@@ -49,7 +59,7 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    const title = tx.title_search_data || {};
+    const title = tx.title_search_data.notes || {};
     const additionsRaw = (title as any)?.lawyer_additions;
     const additions: string[] = Array.isArray(additionsRaw)
       ? additionsRaw.filter((s: any) => typeof s === 'string' && s.trim())
@@ -84,13 +94,46 @@ export async function POST(req: NextRequest) {
         { status: 500 }
       );
     }
-
+    const token = randomToken();
+    const tokenHash = sha256(token);
+    const expiresAt = new Date(Date.now() + 1000 * 60 * 60 * 24).toISOString(); // 24h
+    
+    await supabaseAdmin.from('approval_links').insert({
+      transaction_id: transactionId,
+      token_hash: tokenHash,
+      expires_at: expiresAt,
+    });
+    
+    if (tx.lawyer_email) {
+      const approveUrl = `${process.env.APP_PUBLIC_URL}/lawyer/approve/${transactionId}?token=${token}`;
+    
+      await resend.emails.send({
+        from: process.env.MAIL_FROM!,
+        to: tx.lawyer_email,
+        subject: `Requisition Approval Needed - ${tx.file_number}`,
+        html: `
+          <p>Please review and approve the requisition letter for file <b>${tx.file_number}</b>.</p>
+          <p><a href="${approveUrl}">Open approval link</a></p>
+          <p>This link expires in 24 hours.</p>
+        `,
+      });
+    
+      await supabaseAdmin.from('transactions').update({
+        workflow_status: 'REQUISITION_SENT_TO_LAWYER',
+      }).eq('id', transactionId);
+    } else {
+      await supabaseAdmin.from('transactions').update({
+        workflow_status: 'REQUISITION_DRAFT_READY_AWAITING_LAWYER_EMAIL',
+      }).eq('id', transactionId);
+    }
     return NextResponse.json({
       ok: true,
       message: 'Requisition draft generated',
       transactionId: tx.id,
       additions_count: additions.length,
     });
+  
+
   } catch (err: any) {
     return NextResponse.json(
       {

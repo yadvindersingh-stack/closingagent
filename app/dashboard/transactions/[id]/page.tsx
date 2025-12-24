@@ -32,6 +32,11 @@ interface Transaction {
 
   requisition_letter_draft?: string | null;
   requisition_letter_generated_at?: string | null;
+  vendor_solicitor_email?: string | null;
+lawyer_email?: string | null;
+requisition_letter_draft_html?: string | null;
+requisition_approved_at?: string | null;
+
 }
 
 interface Document {
@@ -50,6 +55,8 @@ type ChecklistRow = {
   status: 'DONE' | 'PENDING' | 'BLOCKED';
   detail?: string;
 };
+
+
 
 function deriveChecklist(tx: any, docs: any[]): ChecklistRow[] {
   const apsDocs = (docs || []).filter((d) => d.type === 'APS');
@@ -186,7 +193,41 @@ export default function TransactionDetailPage() {
       setLoading(false);
     }
   }
-
+  const [lawyerEmail, setLawyerEmail] = useState('');
+  const [vendorEmail, setVendorEmail] = useState('');
+  const [savingContacts, setSavingContacts] = useState(false);
+  
+  useEffect(() => {
+    if (!transaction) return;
+    setLawyerEmail(transaction.lawyer_email || '');
+    setVendorEmail(transaction.vendor_solicitor_email || '');
+  }, [transaction?.id]);
+  
+  const handleSaveContacts = async () => {
+    if (!transaction?.id) return;
+  
+    try {
+      setSavingContacts(true);
+      const { error } = await supabase
+        .from('transactions')
+        .update({
+          lawyer_email: lawyerEmail || null,
+          vendor_solicitor_email: vendorEmail || null,
+        })
+        .eq('id', transaction.id);
+  
+      if (error) throw error;
+  
+      toast.success('Contacts updated');
+      await loadTransactionData();
+    } catch (e: any) {
+      console.error(e);
+      toast.error(e?.message || 'Failed to update contacts');
+    } finally {
+      setSavingContacts(false);
+    }
+  };
+  
   const handleRunApsExtraction = async (documentId: string) => {
     const tx = transaction;
     if (!tx) {
@@ -621,6 +662,37 @@ export default function TransactionDetailPage() {
           </CardContent>
         </Card>
       </div>
+      <Card>
+  <CardHeader>
+    <CardTitle>Contacts</CardTitle>
+  </CardHeader>
+  <CardContent className="space-y-4">
+    <div>
+      <p className="text-sm text-slate-600">Lawyer Email (approval link)</p>
+      <input
+        className="w-full border rounded-md px-2 py-2 text-sm"
+        placeholder="lawyer@firm.com"
+        value={lawyerEmail}
+        onChange={(e) => setLawyerEmail(e.target.value)}
+      />
+    </div>
+
+    <div>
+      <p className="text-sm text-slate-600">Vendor Solicitor Email (final send)</p>
+      <input
+        className="w-full border rounded-md px-2 py-2 text-sm"
+        placeholder="vendorsolicitor@firm.com"
+        value={vendorEmail}
+        onChange={(e) => setVendorEmail(e.target.value)}
+      />
+    </div>
+
+    <Button onClick={handleSaveContacts} disabled={savingContacts}>
+      {savingContacts ? 'Saving…' : 'Save Contacts'}
+    </Button>
+  </CardContent>
+</Card>
+
 <Card>
   <CardHeader className="space-y-1">
     <CardTitle className="text-base">Workflow</CardTitle>
@@ -870,6 +942,7 @@ export default function TransactionDetailPage() {
             )}
           </CardContent>
         </Card>
+        
       )}
 
       {/* Requisition Letter */}
@@ -887,23 +960,24 @@ export default function TransactionDetailPage() {
         </CardHeader>
 
         <CardContent>
-          {!transaction.requisition_letter_draft ? (
-            <p className="text-sm text-slate-600">
-              No requisition letter draft generated yet.
-              {canGenerateReq
-                ? ' Click "Generate Draft" to create one using APS and client intake.'
-                : ' APS extraction and client intake must be completed first.'}
-            </p>
-          ) : (
-            <div className="space-y-2">
-              {transaction.requisition_letter_generated_at && (
-                <p className="text-xs text-slate-500">
-                  Generated: {new Date(transaction.requisition_letter_generated_at).toLocaleString()}
-                </p>
-              )}
-              <textarea className="w-full border rounded-md p-3 text-sm h-80 leading-relaxed" readOnly value={transaction.requisition_letter_draft} />
-            </div>
-          )}
+        {!transaction.requisition_letter_draft_html ? (
+  <p className="text-sm text-slate-600">
+    No requisition letter draft generated yet.
+  </p>
+) : (
+  <div className="space-y-2">
+    {transaction.requisition_letter_generated_at && (
+      <p className="text-xs text-slate-500">
+        Generated: {new Date(transaction.requisition_letter_generated_at).toLocaleString()}
+      </p>
+    )}
+
+    <div
+      className="border rounded-md p-4 bg-white text-sm prose max-w-none"
+      dangerouslySetInnerHTML={{ __html: transaction.requisition_letter_draft_html }}
+    />
+  </div>
+)}
         </CardContent>
       </Card>
     </div>
