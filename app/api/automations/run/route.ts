@@ -147,16 +147,28 @@ export async function POST(req: NextRequest) {
       const approveUrl = `${appUrl}/lawyer/approve/${transactionId}?token=${token}`;
 
       try {
-        await resend.emails.send({
-          from,
-          to: lawyerEmail,
-          subject: `Requisition Approval Needed - ${tx.file_number}`,
-          html: `
-            <p>Please review and approve the requisition letter for file <b>${tx.file_number}</b>.</p>
-            <p><a href="${approveUrl}">Open approval link</a></p>
-            <p>This link expires in 24 hours.</p>
-          `,
+        await fetch(`${process.env.APP_PUBLIC_URL}/api/email/send`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            transactionId: tx.id,
+            kind: 'LAWYER_APPROVAL',
+            to: tx.client_email,
+            subject: `Lawyer Approval - ${tx.file_number}`,
+            html: `
+              <p>Please review and approve:</p>
+              <p>
+                <a href="${approveUrl}" target="_blank" rel="noopener noreferrer">
+                  Open intake form
+                </a>
+              </p>
+            `,
+          }),
         });
+      } catch (err) {
+        console.error('Failed to send lawyer approval email', err);
+      }
+      
 
         await supabaseAdmin
           .from('transactions')

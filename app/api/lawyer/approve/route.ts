@@ -91,6 +91,24 @@ export async function POST(req: NextRequest) {
       html: editedHtml,
     });
 
+
+try {
+  await fetch(`${process.env.APP_PUBLIC_URL}/api/email/send`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      transactionId: tx.id,
+      kind: 'Requisition Letter',
+      to: tx.vendor_solicitor_email,
+      subject: `Requisitions - ${tx.file_number || tx.id}`,
+      html: editedHtml,
+    }),
+  });
+} catch (err) {
+  console.error('Failed to send lawyer approval email', err);
+}
+
+
     // Update status after send
     await supabaseAdmin
       .from('transactions')
