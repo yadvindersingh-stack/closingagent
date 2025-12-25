@@ -76,6 +76,15 @@ export async function POST(req: NextRequest) {
     });
   } catch (err: any) {
     // If we fail before outbox row exists, we can't log it here.
+    await supabaseAdmin.from('email_outbox').insert({
+      transaction_id: '0000',
+      kind: 'LAWYER_APPROVAL',
+      to_email: '',
+      subject: ``,
+      status: 'FAILED',
+      error: err,
+    });
+    
     return NextResponse.json(
       { ok: false, message: 'Failed to send', error: err?.message ?? String(err), startedAt },
       { status: 500 }
