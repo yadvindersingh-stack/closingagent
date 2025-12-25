@@ -169,7 +169,7 @@ export async function POST(req: NextRequest) {
         console.error('Failed to send lawyer approval email', err);
       }
       
-
+try{
         await supabaseAdmin
           .from('transactions')
           .update({ workflow_status: 'REQUISITION_SENT_TO_LAWYER' })
