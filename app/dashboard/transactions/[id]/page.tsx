@@ -960,24 +960,21 @@ export default function TransactionDetailPage() {
         </CardHeader>
 
         <CardContent>
-        {!transaction.requisition_letter_draft_html ? (
-  <p className="text-sm text-slate-600">
-    No requisition letter draft generated yet.
-  </p>
-) : (
-  <div className="space-y-2">
-    {transaction.requisition_letter_generated_at && (
-      <p className="text-xs text-slate-500">
-        Generated: {new Date(transaction.requisition_letter_generated_at).toLocaleString()}
-      </p>
-    )}
-
+        {transaction.requisition_letter_draft_html ? (
+  <div className="border rounded-md p-3 bg-white">
     <div
-      className="border rounded-md p-4 bg-white text-sm prose max-w-none"
+      className="prose max-w-none"
       dangerouslySetInnerHTML={{ __html: transaction.requisition_letter_draft_html }}
     />
   </div>
+) : (
+  <textarea
+    className="w-full border rounded-md p-3 text-sm h-80 leading-relaxed"
+    readOnly
+    value={transaction.requisition_letter_draft || ''}
+  />
 )}
+
         </CardContent>
       </Card>
     </div>
