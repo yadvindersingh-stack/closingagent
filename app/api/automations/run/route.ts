@@ -133,6 +133,8 @@ export async function POST(req: NextRequest) {
       token_hash: tokenHash,
       expires_at: expiresAt,
     });
+    
+    
 
     // ✅ Outbound email (lawyer approval) — guarded + debuggable
     const resendKeyOk = !!process.env.RESEND_API_KEY;
