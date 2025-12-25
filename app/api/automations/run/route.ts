@@ -108,7 +108,7 @@ export async function POST(req: NextRequest) {
       const approveUrl = `${process.env.APP_PUBLIC_URL}/lawyer/approve/${transactionId}?token=${token}`;
     
       await resend.emails.send({
-        from: process.env.MAIL_FROM!,
+        from: process.env.RESEND_FROM_EMAIL!,
         to: tx.lawyer_email,
         subject: `Requisition Approval Needed - ${tx.file_number}`,
         html: `

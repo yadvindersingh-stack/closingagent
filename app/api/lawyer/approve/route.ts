@@ -85,7 +85,7 @@ export async function POST(req: NextRequest) {
 
     // Send to vendor solicitor
     await resend.emails.send({
-      from: process.env.MAIL_FROM!, // e.g. lawclerk@ailawclerk.ca
+      from: process.env.RESEND_FROM_EMAIL!, // e.g. lawclerk@ailawclerk.ca
       to: tx.vendor_solicitor_email,
       subject: `Requisitions - ${tx.file_number || tx.id}`,
       html: editedHtml,
