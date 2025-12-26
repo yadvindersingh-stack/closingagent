@@ -313,6 +313,8 @@ export default function TransactionDetailPage() {
       await loadTransactionData();
       toast.success('APS extraction complete');
       router.refresh();
+      const appUrl = process.env.APP_PUBLIC_URL;
+
       await fetch(`/api/email/send`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -321,7 +323,7 @@ export default function TransactionDetailPage() {
           kind: 'CLIENT_INTAKE',
           to: tx.client_email,
           subject: `Client Intake Form - ${tx.file_number}`,
-          html: `<p>Please complete intake:</p><p><a href="${process.env.APP_PUBLIC_URL}/intake/${tx.id}">Open intake form</a></p>`
+          html: `<p>Please complete intake:</p><p><a href="${appUrl}/intake/${tx.id}">Open intake form</a></p>`
         }),
       });
       

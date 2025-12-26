@@ -143,7 +143,7 @@ export async function POST(req: NextRequest) {
 
     const lawyerEmail = (tx as any).lawyer_email as string | undefined;
 
-    if (lawyerEmail && resendKeyOk && from && appUrl) {
+    if (lawyerEmail) {
       const approveUrl = `${appUrl}/lawyer/approve/${transactionId}?token=${token}`;
 
       try {
@@ -153,7 +153,7 @@ export async function POST(req: NextRequest) {
           body: JSON.stringify({
             transactionId: tx.id,
             kind: 'LAWYER_APPROVAL',
-            to: tx.client_email,
+            to: tx.lawyerEmail,
             subject: `Lawyer Approval - ${tx.file_number}`,
             html: `
               <p>Please review and approve:</p>

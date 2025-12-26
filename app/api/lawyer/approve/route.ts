@@ -83,13 +83,7 @@ export async function POST(req: NextRequest) {
       .update({ used_at: now })
       .eq('id', link.id);
 
-    // Send to vendor solicitor
-    await resend.emails.send({
-      from: process.env.RESEND_FROM_EMAIL!, // e.g. lawclerk@ailawclerk.ca
-      to: tx.vendor_solicitor_email,
-      subject: `Requisitions - ${tx.file_number || tx.id}`,
-      html: editedHtml,
-    });
+
 
 
 try {
