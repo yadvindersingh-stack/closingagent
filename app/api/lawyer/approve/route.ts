@@ -93,7 +93,7 @@ export async function POST(req: NextRequest) {
 
 
 try {
-  await fetch(`${process.env.APP_PUBLIC_URL}/api/email/send`, {
+  await fetch(`/api/email/send`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
