@@ -144,7 +144,7 @@ export async function POST(req: NextRequest) {
     const lawyerEmail = (tx as any).lawyer_email as string | undefined;
 
     if (lawyerEmail) {
-      const approveUrl = `${appUrl}/lawyer/approve/${transactionId}?token=${token}`;
+      const approveUrl = `${appUrl}/lawyer/approve/${tx.id}?token=${token}`;
 
       try {
         await fetch(`/api/email/send`, {
@@ -166,6 +166,14 @@ export async function POST(req: NextRequest) {
           }),
         });
       } catch (err) {
+        await supabaseAdmin.from('email_outbox').insert({
+          transaction_id: '0000',
+          kind: 'LAWYER_APPROVAL',
+          to_email: '',
+          subject: ``,
+          status: 'FAILED',
+          error: err,
+        });
         console.error('Failed to send lawyer approval email', err);
       }
       
