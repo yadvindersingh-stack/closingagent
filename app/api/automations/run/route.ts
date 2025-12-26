@@ -144,9 +144,7 @@ export async function POST(req: NextRequest) {
     const lawyerEmail = (tx as any).lawyer_email as string | undefined;
 
     if (lawyerEmail) {
-      const approveUrl = `${appUrl}/lawyer/approve/${tx.id}?token=${token}`;
-
-      try {
+      try { const approveUrl = `${appUrl}/lawyer/approve/${tx.id}?token=${token}`;
         await fetch(`/api/email/send`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
