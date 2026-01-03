@@ -1,11 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase-admin';
-import { Resend } from 'resend';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-const resend = new Resend(process.env.RESEND_API_KEY || '');
+import { Resend } from 'resend';
+
+function getResendClient() {
+  const key = process.env.RESEND_API_KEY ?? '';
+  if (!key) return null;
+  return new Resend(key);
+}
 
 export async function POST(req: NextRequest) {
   const startedAt = new Date().toISOString();
@@ -54,7 +59,12 @@ export async function POST(req: NextRequest) {
     }
 
     // 2) Send via Resend
-    const result = await resend.emails.send({
+    const resendClient = getResendClient();
+    if (!resendClient) {
+      return NextResponse.json({ ok: false, message: 'RESEND_API_KEY is not configured' }, { status: 500 });
+    }
+
+    const result = await resendClient.emails.send({
       from: process.env.RESEND_FROM_EMAIL!,
       to,
       subject,

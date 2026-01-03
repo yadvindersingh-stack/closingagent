@@ -2,7 +2,12 @@ import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 import { Resend } from "resend";
 
-const resend = new Resend(process.env.RESEND_API_KEY!);
+// Lazily create Resend client to avoid throwing during module import
+function getResendClient() {
+  const key = process.env.RESEND_API_KEY ?? '';
+  if (!key) return null;
+  return new Resend(key);
+}
 
 export async function POST(req: NextRequest) {
   try {
@@ -43,7 +48,12 @@ export async function POST(req: NextRequest) {
 
     const subject = `Requisitions – File ${tx.file_number}`;
 
-    await resend.emails.send({
+    const resendClient = getResendClient();
+    if (!resendClient) {
+      return NextResponse.json({ ok: false, message: 'RESEND_API_KEY is not configured' }, { status: 500 });
+    }
+
+    await resendClient.emails.send({
       from,
       to: [tx.vendor_solicitor_email],
       subject,

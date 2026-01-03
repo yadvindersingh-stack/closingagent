@@ -1,10 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from 'openai';
+
+function getOpenAIClient() {
+  const key = process.env.OPENAI_API_KEY ?? '';
+  if (!key) return null;
+  return new OpenAI({ apiKey: key });
+}
 import pdfParse from 'pdf-parse-fork';
 import { supabaseAdmin } from '@/lib/supabase-admin';
 import { validateAPSData, APSData } from '@/lib/aps-schema';
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY! });
+// openai client is created lazily in handlers to avoid throwing during module import
 
 function stripJsonFences(s: string) {
   return s
@@ -214,6 +220,9 @@ export async function POST(req: NextRequest) {
 
     // 4) LLM extraction
     const prompt = APS_EXTRACTION_PROMPT.replace('{{APS_TEXT}}', text);
+
+    const openai = getOpenAIClient();
+    if (!openai) throw new Error('OPENAI_API_KEY is not configured');
 
     const completion = await openai.chat.completions.create({
       model: 'gpt-4o-mini',

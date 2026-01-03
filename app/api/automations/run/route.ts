@@ -3,11 +3,15 @@ import { supabaseAdmin } from '@/lib/supabase-admin';
 import { buildRequisitionHtml } from '@/lib/requisition-html';
 import crypto from 'crypto';
 import { Resend } from 'resend';
+import { buildRequisitionText } from '@/lib/requisition-text';
+
+const resend = new Resend(process.env.RESEND_API_KEY!);
+
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-const resend = new Resend(process.env.RESEND_API_KEY || '');
+// Resend client not needed directly in this route; email sending is delegated to /api/email/send
 
 function randomToken() {
   return crypto.randomBytes(24).toString('hex'); // 48 chars
@@ -27,6 +31,34 @@ function htmlToText(html: string) {
     .replace(/\n{3,}/g, '\n\n')
     .trim();
 }
+
+const TS_BLOCK_START = "\n\n---\nTITLE SEARCH NOTES (FROM LAWYER)\n";
+const TS_BLOCK_END = "\n---\n";
+
+function stripTitleSearchBlock(text: string) {
+  if (!text) return text;
+  const i = text.indexOf(TS_BLOCK_START);
+  if (i === -1) return text;
+  return text.slice(0, i).trimEnd();
+}
+
+function formatBullets(items: string[]) {
+  const clean = (items || [])
+    .map((s) => String(s || "").trim())
+    .filter(Boolean);
+  if (clean.length === 0) return "";
+  return clean.map((s) => `- ${s}`).join("\n");
+}
+
+function appendTitleSearchNotesToText(draftText: string, appended: string[]) {
+  const base = stripTitleSearchBlock(draftText);
+
+  const bullets = formatBullets(appended);
+  if (!bullets) return base;
+
+  return `${base}${TS_BLOCK_START}${bullets}${TS_BLOCK_END}`;
+}
+
 
 export async function POST(req: NextRequest) {
   try {
@@ -96,25 +128,33 @@ export async function POST(req: NextRequest) {
       .eq('id', tx.user_id)
       .maybeSingle();
 
-    const html = buildRequisitionHtml({
-      transaction: tx,
-      profile: profile || null,
-      title: titleSearch,
-      appended, // ✅ append to end as main points
-    });
+  const html = buildRequisitionHtml({
+  transaction: tx,
+  profile: profile || null,
+  title: titleSearch,
+  appended,
+});
 
-    const text = htmlToText(html);
+// ✅ text should come from the real text template (NOT htmlToText)
+const text = buildRequisitionText({
+  transaction: tx,
+  profile: profile || null,
+  appended, // still appended at text layer (as you want)
+});
+
+
 
     // ✅ Save BOTH html + text
-    const { error: updErr } = await supabaseAdmin
-      .from('transactions')
-      .update({
-        requisition_letter_draft: text,
-        requisition_letter_draft_html: html,
-        requisition_letter_generated_at: new Date().toISOString(),
-        workflow_status: 'REQUISITION_DRAFT_READY',
-      })
-      .eq('id', tx.id);
+   const { error: updErr } = await supabaseAdmin
+  .from('transactions')
+  .update({
+    requisition_letter_draft: text,      // ✅ always plain text with appended notes
+    requisition_letter_draft_html: html,      // keep HTML as-is for later “View as HTML”
+    requisition_letter_generated_at: new Date().toISOString(),
+    workflow_status: 'REQUISITION_DRAFT_READY',
+  })
+  .eq('id', tx.id);
+
 
     if (updErr) {
       return NextResponse.json(
@@ -137,85 +177,121 @@ export async function POST(req: NextRequest) {
     
 
     // ✅ Outbound email (lawyer approval) — guarded + debuggable
-    const resendKeyOk = !!process.env.RESEND_API_KEY;
-    const from = process.env.RESEND_FROM_EMAIL; // must be verified domain email
-    const appUrl = process.env.APP_PUBLIC_URL;
+   // const resendKeyOk = !!process.env.RESEND_API_KEY;
+    //const from = process.env.RESEND_FROM_EMAIL; // must be verified domain email
+    //const appUrl = process.env.APP_PUBLIC_URL;
 
-    const lawyerEmail = (tx as any).lawyer_email as string | undefined;
+const lawyerEmail = (tx as any).lawyer_email as string | undefined;
 
-    if (lawyerEmail) {
-      try { const approveUrl = `${appUrl}/lawyer/approve/${tx.id}?token=${token}`;
-        await fetch(`/api/email/send`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            transactionId: tx.id,
-            kind: 'LAWYER_APPROVAL',
-            to: tx.lawyerEmail,
-            subject: `Lawyer Approval - ${tx.file_number}`,
-            html: `
-              <p>Please review and approve:</p>
-              <p>
-                <a href="${approveUrl}" target="_blank" rel="noopener noreferrer">
-                  Open intake form
-                </a>
-              </p>
-            `,
-          }),
-        });
-      } catch (err) {
-        await supabaseAdmin.from('email_outbox').insert({
-          transaction_id: '0000',
-          kind: 'LAWYER_APPROVAL',
-          to_email: '',
-          subject: ``,
-          status: 'FAILED',
-          error: err,
-        });
-        console.error('Failed to send lawyer approval email', err);
-      }
-      
-try{
-        await supabaseAdmin
-          .from('transactions')
-          .update({ workflow_status: 'REQUISITION_SENT_TO_LAWYER' })
-          .eq('id', transactionId);
-      } catch (e: any) {
-        // Don’t fail the whole automation if email fails — just keep draft ready
-        await supabaseAdmin
-          .from('transactions')
-          .update({ workflow_status: 'REQUISITION_DRAFT_READY_EMAIL_FAILED' })
-          .eq('id', transactionId);
+if (!process.env.RESEND_API_KEY || !process.env.RESEND_FROM_EMAIL) {
+  await supabaseAdmin
+    .from('transactions')
+    .update({ workflow_status: 'REQUISITION_DRAFT_READY_AWAITING_EMAIL_CONFIG' })
+    .eq('id', transactionId);
 
-        return NextResponse.json(
-          {
-            ok: true,
-            message: 'Draft generated but lawyer email failed',
-            transactionId: tx.id,
-            email_error: e?.message ?? String(e),
-          },
-          { status: 200 }
-        );
-      }
-    } else if (!lawyerEmail) {
-      await supabaseAdmin
-        .from('transactions')
-        .update({ workflow_status: 'REQUISITION_DRAFT_READY_AWAITING_LAWYER_EMAIL' })
-        .eq('id', transactionId);
-    } else {
-      await supabaseAdmin
-        .from('transactions')
-        .update({ workflow_status: 'REQUISITION_DRAFT_READY_AWAITING_EMAIL_CONFIG' })
-        .eq('id', transactionId);
-    }
+  return NextResponse.json({
+    ok: true,
+    message: 'Draft generated; missing email config',
+    transactionId: tx.id,
+  });
+}
 
-    return NextResponse.json({
+if (!lawyerEmail) {
+  await supabaseAdmin
+    .from('transactions')
+    .update({ workflow_status: 'REQUISITION_DRAFT_READY_AWAITING_LAWYER_EMAIL' })
+    .eq('id', transactionId);
+
+  return NextResponse.json({
+    ok: true,
+    message: 'Draft generated; missing lawyer email',
+    transactionId: tx.id,
+  });
+}
+
+// build baseUrl robustly (works in dev & prod)
+const baseUrl =
+  process.env.APP_PUBLIC_URL?.replace(/\/$/, '') ||
+  (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000');
+
+const approveUrl = `${baseUrl}/lawyer/approve/${tx.id}?token=${token}`;
+
+try {
+  const { data: outbox, error: outboxErr } = await supabaseAdmin
+    .from('email_outbox')
+    .insert({
+      transaction_id: tx.id,
+      kind: 'LAWYER_APPROVAL',
+      to_email: lawyerEmail,
+      subject: `Lawyer Approval - ${tx.file_number}`,
+      status: 'QUEUED',
+    })
+    .select('id')
+    .maybeSingle();
+
+  if (outboxErr) throw outboxErr;
+  if (!outbox?.id) throw new Error('email_outbox insert did not return id');
+
+  const result = await resend.emails.send({
+    from: process.env.RESEND_FROM_EMAIL,
+    to: lawyerEmail,
+    subject: `Lawyer Approval - ${tx.file_number}`,
+    html: `
+      <p>Please review and approve:</p>
+      <p><a href="${approveUrl}" target="_blank" rel="noopener noreferrer">Review & approve</a></p>
+    `,
+  });
+
+  await supabaseAdmin
+    .from('email_outbox')
+    .update({
+      status: 'SENT',
+      sent_at: new Date().toISOString(),
+      provider_message_id: result.data?.id ?? null,
+      error: null,
+    })
+    .eq('id', outbox.id);
+
+  await supabaseAdmin
+    .from('transactions')
+    .update({ workflow_status: 'REQUISITION_SENT_TO_LAWYER' })
+    .eq('id', transactionId);
+
+  return NextResponse.json({
+    ok: true,
+    message: 'Draft generated and lawyer email sent/queued',
+    transactionId: tx.id,
+  });
+
+} catch (e: any) {
+  try {
+    await supabaseAdmin
+      .from('email_outbox')
+      .update({
+        status: 'FAILED',
+        error: e?.message ?? String(e),
+      })
+      .eq('transaction_id', tx.id)
+      .eq('kind', 'LAWYER_APPROVAL');
+  } catch {}
+
+  await supabaseAdmin
+    .from('transactions')
+    .update({ workflow_status: 'REQUISITION_DRAFT_READY_EMAIL_FAILED' })
+    .eq('id', transactionId);
+
+  return NextResponse.json(
+    {
       ok: true,
-      message: 'Requisition draft generated',
+      message: 'Draft generated but lawyer email failed',
       transactionId: tx.id,
-      appended_count: appended.length,
-    });
-  } catch (err: any) {
+      email_error: e?.message ?? String(e),
+    },
+    { status: 200 }
+  );
+}
+
+}catch (err: any) {
     return NextResponse.json(
       {
         ok: false,

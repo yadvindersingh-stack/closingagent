@@ -1,9 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import crypto from 'crypto';
 import { supabaseAdmin } from '@/lib/supabase-admin';
-import { Resend } from 'resend';
-
-const resend = new Resend(process.env.RESEND_API_KEY!);
+// Resend client not needed directly here; we call /api/email/send instead.
 
 function sha256(s: string) {
   return crypto.createHash('sha256').update(s).digest('hex');
@@ -83,11 +81,9 @@ export async function POST(req: NextRequest) {
       .update({ used_at: now })
       .eq('id', link.id);
 
-
-
-
+      
 try {
-  await fetch(`/api/email/send`, {
+  await fetch(`${process.env.APP_PUBLIC_URL}/api/email/send`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({

@@ -56,6 +56,7 @@ export default function LawyerApprovePage() {
       if (!res.ok) throw new Error(body?.message || 'Approval failed');
 
       toast.success('Approved and sent to vendor solicitor');
+      
     } catch (e: any) {
       console.error(e);
       toast.error(e?.message || 'Failed to approve');
@@ -80,14 +81,7 @@ export default function LawyerApprovePage() {
           )}
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <p className="text-sm text-slate-600 mb-2">Edit HTML (minor edits)</p>
-              <textarea
-                className="w-full border rounded-md p-3 text-xs h-[520px] font-mono"
-                value={html}
-                onChange={(e) => setHtml(e.target.value)}
-              />
-            </div>
+
 
             <div>
               <p className="text-sm text-slate-600 mb-2">Preview</p>

@@ -1,8 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from 'openai';
+
+function getOpenAIClient() {
+  const key = process.env.OPENAI_API_KEY ?? '';
+  if (!key) return null;
+  return new OpenAI({ apiKey: key });
+}
 import { supabaseAdmin } from '@/lib/supabase-admin';
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY! });
+// OpenAI client created lazily via `getOpenAIClient` to avoid import-time construction
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
@@ -193,6 +199,9 @@ Rules:
 Context:
 ${JSON.stringify(context)}
 `.trim();
+
+      const openai = getOpenAIClient();
+      if (!openai) throw new Error('OPENAI_API_KEY is not configured');
 
       const completion = await openai.chat.completions.create({
         model: 'gpt-4o-mini',

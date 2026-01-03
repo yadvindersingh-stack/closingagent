@@ -1,0 +1,231 @@
+
+> nextjs@0.1.0 dev
+> next dev
+
+  ▲ Next.js 13.5.1
+  - Local:        http://localhost:3000
+
+ ✓ Ready in 1573ms
+Browserslist: caniuse-lite is outdated. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+ ⚠ ./node_modules/@supabase/realtime-js/dist/main/RealtimeClient.js
+Critical dependency: the request of a dependency is an expression
+
+Import trace for requested module:
+./node_modules/@supabase/realtime-js/dist/main/RealtimeClient.js
+./node_modules/@supabase/realtime-js/dist/main/index.js
+./node_modules/@supabase/supabase-js/dist/main/index.js
+./lib/supabase.ts
+./lib/auth-context.tsx
+Warning: NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_ANON_KEY is not set. Supabase client will be unavailable until configured.
+ ⚠ ./node_modules/@supabase/realtime-js/dist/main/RealtimeClient.js
+Critical dependency: the request of a dependency is an expression
+
+Import trace for requested module:
+./node_modules/@supabase/realtime-js/dist/main/RealtimeClient.js
+./node_modules/@supabase/realtime-js/dist/main/index.js
+./node_modules/@supabase/supabase-js/dist/main/index.js
+./lib/supabase.ts
+./lib/auth-context.tsx
+ ○ compiling /page ...
+ ⚠ ./node_modules/@supabase/realtime-js/dist/main/RealtimeClient.js
+Critical dependency: the request of a dependency is an expression
+
+Import trace for requested module:
+./node_modules/@supabase/realtime-js/dist/main/RealtimeClient.js
+./node_modules/@supabase/realtime-js/dist/main/index.js
+./node_modules/@supabase/supabase-js/dist/main/index.js
+./lib/supabase.ts
+./lib/auth-context.tsx
+ ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+   Reload env: .env
+ ⚠ ./node_modules/@supabase/realtime-js/dist/main/RealtimeClient.js
+Critical dependency: the request of a dependency is an expression
+
+Import trace for requested module:
+./node_modules/@supabase/realtime-js/dist/main/RealtimeClient.js
+./node_modules/@supabase/realtime-js/dist/main/index.js
+./node_modules/@supabase/supabase-js/dist/main/index.js
+./lib/supabase.ts
+./lib/auth-context.tsx
+./app/page.tsx
+ ⚠ Fast Refresh had to perform a full reload. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+ ⚠ ./node_modules/@supabase/realtime-js/dist/main/RealtimeClient.js
+Critical dependency: the request of a dependency is an expression
+
+Import trace for requested module:
+./node_modules/@supabase/realtime-js/dist/main/RealtimeClient.js
+./node_modules/@supabase/realtime-js/dist/main/index.js
+./node_modules/@supabase/supabase-js/dist/main/index.js
+./lib/supabase.ts
+./lib/auth-context.tsx
+./app/page.tsx
+ ⚠ ./node_modules/@supabase/realtime-js/dist/main/RealtimeClient.js
+Critical dependency: the request of a dependency is an expression
+
+Import trace for requested module:
+./node_modules/@supabase/realtime-js/dist/main/RealtimeClient.js
+./node_modules/@supabase/realtime-js/dist/main/index.js
+./node_modules/@supabase/supabase-js/dist/main/index.js
+./lib/supabase.ts
+./lib/auth-context.tsx
+ ⚠ ./node_modules/@supabase/realtime-js/dist/main/RealtimeClient.js
+Critical dependency: the request of a dependency is an expression
+
+Import trace for requested module:
+./node_modules/@supabase/realtime-js/dist/main/RealtimeClient.js
+./node_modules/@supabase/realtime-js/dist/main/index.js
+./node_modules/@supabase/supabase-js/dist/main/index.js
+./lib/supabase.ts
+./lib/auth-context.tsx
+ ⚠ ./node_modules/@supabase/realtime-js/dist/main/RealtimeClient.js
+Critical dependency: the request of a dependency is an expression
+
+Import trace for requested module:
+./node_modules/@supabase/realtime-js/dist/main/RealtimeClient.js
+./node_modules/@supabase/realtime-js/dist/main/index.js
+./node_modules/@supabase/supabase-js/dist/main/index.js
+./lib/supabase.ts
+./lib/auth-context.tsx
+ ⚠ ./node_modules/@supabase/realtime-js/dist/main/RealtimeClient.js
+Critical dependency: the request of a dependency is an expression
+
+Import trace for requested module:
+./node_modules/@supabase/realtime-js/dist/main/RealtimeClient.js
+./node_modules/@supabase/realtime-js/dist/main/index.js
+./node_modules/@supabase/supabase-js/dist/main/index.js
+./lib/supabase.ts
+./lib/auth-context.tsx
+ ⚠ ./node_modules/@supabase/realtime-js/dist/main/RealtimeClient.js
+Critical dependency: the request of a dependency is an expression
+
+Import trace for requested module:
+./node_modules/@supabase/realtime-js/dist/main/RealtimeClient.js
+./node_modules/@supabase/realtime-js/dist/main/index.js
+./node_modules/@supabase/supabase-js/dist/main/index.js
+./lib/supabase.ts
+./lib/auth-context.tsx
+ X Error: Cannot find module './vendor-chunks/@supabase.js'
+Require stack:
+- /Users/yadvinder.singh/closingagent/.next/server/webpack-runtime.js
+- /Users/yadvinder.singh/closingagent/.next/server/app/dashboard/transactions/[id]/page.js
+- /Users/yadvinder.singh/closingagent/node_modules/next/dist/server/require.js
+- /Users/yadvinder.singh/closingagent/node_modules/next/dist/server/load-components.js
+- /Users/yadvinder.singh/closingagent/node_modules/next/dist/build/utils.js
+- /Users/yadvinder.singh/closingagent/node_modules/next/dist/server/dev/static-paths-worker.js
+- /Users/yadvinder.singh/closingagent/node_modules/next/dist/compiled/jest-worker/processChild.js
+    at Module._resolveFilename (node:internal/modules/cjs/loader:1420:15)
+    at /Users/yadvinder.singh/closingagent/node_modules/next/dist/server/require-hook.js:54:36
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1058:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1063:22)
+    at Module._load (node:internal/modules/cjs/loader:1226:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:328:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:245:24)
+    at Module.require (node:internal/modules/cjs/loader:1503:12)
+    at mod.require (/Users/yadvinder.singh/closingagent/node_modules/next/dist/server/require-hook.js:64:28)
+    at require (node:internal/modules/helpers:152:16) {
+  type: 'Error',
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [
+    '/Users/yadvinder.singh/closingagent/.next/server/webpack-runtime.js',
+    '/Users/yadvinder.singh/closingagent/.next/server/app/dashboard/transactions/[id]/page.js',
+    '/Users/yadvinder.singh/closingagent/node_modules/next/dist/server/require.js',
+    '/Users/yadvinder.singh/closingagent/node_modules/next/dist/server/load-components.js',
+    '/Users/yadvinder.singh/closingagent/node_modules/next/dist/build/utils.js',
+    '/Users/yadvinder.singh/closingagent/node_modules/next/dist/server/dev/static-paths-worker.js',
+    '/Users/yadvinder.singh/closingagent/node_modules/next/dist/compiled/jest-worker/processChild.js'
+  ],
+  page: '/dashboard/transactions/1b5e8648-9245-46f0-9d99-f33ccc861cb4'
+}
+ ⚠ ./node_modules/@supabase/realtime-js/dist/main/RealtimeClient.js
+Critical dependency: the request of a dependency is an expression
+
+Import trace for requested module:
+./node_modules/@supabase/realtime-js/dist/main/RealtimeClient.js
+./node_modules/@supabase/realtime-js/dist/main/index.js
+./node_modules/@supabase/supabase-js/dist/main/index.js
+./lib/supabase.ts
+./lib/auth-context.tsx
+ ⚠ ./node_modules/@supabase/realtime-js/dist/main/RealtimeClient.js
+Critical dependency: the request of a dependency is an expression
+
+Import trace for requested module:
+./node_modules/@supabase/realtime-js/dist/main/RealtimeClient.js
+./node_modules/@supabase/realtime-js/dist/main/index.js
+./node_modules/@supabase/supabase-js/dist/main/index.js
+./lib/supabase.ts
+./lib/auth-context.tsx
+ X Error: Cannot find module './vendor-chunks/@supabase.js'
+Require stack:
+- /Users/yadvinder.singh/closingagent/.next/server/webpack-runtime.js
+- /Users/yadvinder.singh/closingagent/.next/server/app/dashboard/transactions/[id]/page.js
+- /Users/yadvinder.singh/closingagent/node_modules/next/dist/server/require.js
+- /Users/yadvinder.singh/closingagent/node_modules/next/dist/server/load-components.js
+- /Users/yadvinder.singh/closingagent/node_modules/next/dist/build/utils.js
+- /Users/yadvinder.singh/closingagent/node_modules/next/dist/server/dev/static-paths-worker.js
+- /Users/yadvinder.singh/closingagent/node_modules/next/dist/compiled/jest-worker/processChild.js
+    at Module._resolveFilename (node:internal/modules/cjs/loader:1420:15)
+    at /Users/yadvinder.singh/closingagent/node_modules/next/dist/server/require-hook.js:54:36
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1058:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1063:22)
+    at Module._load (node:internal/modules/cjs/loader:1226:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:328:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:245:24)
+    at Module.require (node:internal/modules/cjs/loader:1503:12)
+    at mod.require (/Users/yadvinder.singh/closingagent/node_modules/next/dist/server/require-hook.js:64:28)
+    at require (node:internal/modules/helpers:152:16) {
+  type: 'Error',
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [
+    '/Users/yadvinder.singh/closingagent/.next/server/webpack-runtime.js',
+    '/Users/yadvinder.singh/closingagent/.next/server/app/dashboard/transactions/[id]/page.js',
+    '/Users/yadvinder.singh/closingagent/node_modules/next/dist/server/require.js',
+    '/Users/yadvinder.singh/closingagent/node_modules/next/dist/server/load-components.js',
+    '/Users/yadvinder.singh/closingagent/node_modules/next/dist/build/utils.js',
+    '/Users/yadvinder.singh/closingagent/node_modules/next/dist/server/dev/static-paths-worker.js',
+    '/Users/yadvinder.singh/closingagent/node_modules/next/dist/compiled/jest-worker/processChild.js'
+  ],
+  page: '/dashboard/transactions/1b5e8648-9245-46f0-9d99-f33ccc861cb4'
+}
+ ⚠ ./node_modules/@supabase/realtime-js/dist/main/RealtimeClient.js
+Critical dependency: the request of a dependency is an expression
+
+Import trace for requested module:
+./node_modules/@supabase/realtime-js/dist/main/RealtimeClient.js
+./node_modules/@supabase/realtime-js/dist/main/index.js
+./node_modules/@supabase/supabase-js/dist/main/index.js
+./lib/supabase.ts
+./lib/auth-context.tsx
+ ⚠ ./node_modules/@supabase/realtime-js/dist/main/RealtimeClient.js
+Critical dependency: the request of a dependency is an expression
+
+Import trace for requested module:
+./node_modules/@supabase/realtime-js/dist/main/RealtimeClient.js
+./node_modules/@supabase/realtime-js/dist/main/index.js
+./node_modules/@supabase/supabase-js/dist/main/index.js
+./lib/supabase.ts
+./lib/auth-context.tsx
+<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: ENOENT: no such file or directory, lstat '/Users/yadvinder.singh/closingagent/.next/server/app'
+<w> [webpack.cache.PackFileCacheStrategy/webpack.FileSystemInfo] Resolving '../../../../.next/server/app/page_client-reference-manifest' in /Users/yadvinder.singh/closingagent/node_modules/next/dist/server for build dependencies doesn't lead to expected result '/Users/yadvinder.singh/closingagent/.next/server/app/page_client-reference-manifest.js', but to 'Error: Can't resolve '../../../../.next/server/app/page_client-reference-manifest' in '/Users/yadvinder.singh/closingagent/node_modules/next/dist/server'' instead. Resolving dependencies are ignored for this path.
+<w>  at resolve commonjs file ../../../../.next/server/app/page_client-reference-manifest (expected /Users/yadvinder.singh/closingagent/.next/server/app/page_client-reference-manifest.js)
+<w>  at file dependencies /Users/yadvinder.singh/closingagent/node_modules/next/dist/server/load-components.js
+<w>  at file /Users/yadvinder.singh/closingagent/node_modules/next/dist/server/load-components.js
+<w>  at file dependencies /Users/yadvinder.singh/closingagent/node_modules/next/dist/build/utils.js
+<w>  at file /Users/yadvinder.singh/closingagent/node_modules/next/dist/build/utils.js
+<w>  at file dependencies /Users/yadvinder.singh/closingagent/node_modules/next/dist/build/worker.js
+<w>  at file /Users/yadvinder.singh/closingagent/node_modules/next/dist/build/worker.js
+<w>  at file dependencies /Users/yadvinder.singh/closingagent/node_modules/next/dist/build/webpack/loaders/next-route-loader/index.js
+<w>  at file /Users/yadvinder.singh/closingagent/node_modules/next/dist/build/webpack/loaders/next-route-loader/index.js
+<w>  at resolve commonjs /Users/yadvinder.singh/closingagent/node_modules/next/dist/build/webpack/loaders/next-route-loader/index.js
+<w> [webpack.cache.PackFileCacheStrategy/webpack.FileSystemInfo] Resolving '../../../../.next/server/app/not-found_client-reference-manifest' in /Users/yadvinder.singh/closingagent/node_modules/next/dist/server for build dependencies doesn't lead to expected result '/Users/yadvinder.singh/closingagent/.next/server/app/not-found_client-reference-manifest.js', but to 'Error: Can't resolve '../../../../.next/server/app/not-found_client-reference-manifest' in '/Users/yadvinder.singh/closingagent/node_modules/next/dist/server'' instead. Resolving dependencies are ignored for this path.
+<w>  at resolve commonjs file ../../../../.next/server/app/not-found_client-reference-manifest (expected /Users/yadvinder.singh/closingagent/.next/server/app/not-found_client-reference-manifest.js)
+<w>  at file dependencies /Users/yadvinder.singh/closingagent/node_modules/next/dist/server/load-components.js
+<w>  at file /Users/yadvinder.singh/closingagent/node_modules/next/dist/server/load-components.js
+<w>  at file dependencies /Users/yadvinder.singh/closingagent/node_modules/next/dist/build/utils.js
+<w>  at file /Users/yadvinder.singh/closingagent/node_modules/next/dist/build/utils.js
+<w>  at file dependencies /Users/yadvinder.singh/closingagent/node_modules/next/dist/build/worker.js
+<w>  at file /Users/yadvinder.singh/closingagent/node_modules/next/dist/build/worker.js
+<w>  at file dependencies /Users/yadvinder.singh/closingagent/node_modules/next/dist/build/webpack/loaders/next-route-loader/index.js
+<w>  at file /Users/yadvinder.singh/closingagent/node_modules/next/dist/build/webpack/loaders/next-route-loader/index.js
+<w>  at resolve commonjs /Users/yadvinder.singh/closingagent/node_modules/next/dist/build/webpack/loaders/next-route-loader/index.js
