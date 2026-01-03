@@ -177,6 +177,102 @@ ${bodyText}
   return { additions, flags };
 }
 
+type IncomingDocKey =
+  | 'reply_to_requisitions'
+  | 'statement_of_adjustments'
+  | 'closing_documents'
+  | 'hst'
+  | 'stat_dec_residency'
+  | 'stat_dec_spousal'
+  | 'undertakings'
+  | 'uff_warranty'
+  | 'bill_of_sale'
+  | 'doc_registration_agreement'
+  | 'signature_required'
+  | 'lawyers_undertaking_vendor_mortgage'
+  | 'payout_statement_mortgage';
+
+function norm(s: string) {
+  return String(s || '').toLowerCase();
+}
+
+function detectIncomingDocs(subject: string, bodyText: string): IncomingDocKey[] {
+  const s = norm(subject);
+  const b = norm(bodyText);
+  const t = `${s}\n${b}`;
+
+  const hits: IncomingDocKey[] = [];
+
+  // 1) Reply to Requisitions
+  if (t.includes('reply to requisition') || t.includes('reply to req') || t.includes('replies to requisition')) {
+    hits.push('reply_to_requisitions');
+  }
+
+  // 2) Statement of Adjustments
+  if (t.includes('statement of adjustments') || t.includes('soa') && t.includes('adjust')) {
+    hits.push('statement_of_adjustments');
+  }
+
+  // 3) Closing documents (generic)
+  if (t.includes('closing document') || t.includes('closing package') || t.includes('closing documents')) {
+    hits.push('closing_documents');
+  }
+
+  // 4) HST
+  if (t.includes('hst') || t.includes('harmonized sales tax')) {
+    hits.push('hst');
+  }
+
+  // 5) Stat dec residency
+  if (t.includes('statutory declaration') && (t.includes('resident') || t.includes('residency') || t.includes('non-resident') || t.includes('canada'))) {
+    hits.push('stat_dec_residency');
+  }
+
+  // 6) Stat dec spousal status
+  if (t.includes('statutory declaration') && (t.includes('spousal') || t.includes('spouse') || t.includes('marital'))) {
+    hits.push('stat_dec_spousal');
+  }
+
+  // 7) Undertakings (generic)
+  if (t.includes('undertaking') || t.includes('undertakings')) {
+    hits.push('undertakings');
+  }
+
+  // 8) UFF warranty
+  if (t.includes('uff') && t.includes('warranty')) {
+    hits.push('uff_warranty');
+  }
+
+  // 9) Bill of sale
+  if (t.includes('bill of sale')) {
+    hits.push('bill_of_sale');
+  }
+
+  // 10) Document registration agreement
+  if (t.includes('document registration agreement') || (t.includes('registration') && t.includes('agreement'))) {
+    hits.push('doc_registration_agreement');
+  }
+
+  // 11) Signature required
+  if (t.includes('signature required') || t.includes('sign here') || t.includes('please sign')) {
+    hits.push('signature_required');
+  }
+
+  // 12) Lawyer’s undertaking – vendor mortgage
+  if (t.includes("lawyer's undertaking") && (t.includes('vendor mortgage') || t.includes('mortgage'))) {
+    hits.push('lawyers_undertaking_vendor_mortgage');
+  }
+
+  // 13) Payout statement mortgage
+  if (t.includes('payout statement') && t.includes('mortgage')) {
+    hits.push('payout_statement_mortgage');
+  }
+
+  // de-dupe
+  return Array.from(new Set(hits));
+}
+
+
 export async function POST(req: NextRequest) {
   try {
     const payload = await req.json().catch(() => null);
@@ -299,6 +395,41 @@ export async function POST(req: NextRequest) {
       .from('inbox_emails')
       .update({ status: 'MATCHED', transaction_id: tx.id })
       .eq('id', inserted.id);
+
+      // ✅ Incoming-docs auto tick (works even if this email isn't a title-search email)
+const detectedDocs = detectIncomingDocs(subject, bodyText || '');
+if (detectedDocs.length > 0) {
+  const nowIso = new Date().toISOString();
+
+  // Load current incoming_docs
+  const { data: existing } = await supabaseAdmin
+    .from('transactions')
+    .select('incoming_docs')
+    .eq('id', tx.id)
+    .maybeSingle();
+
+  const incoming = (existing as any)?.incoming_docs && typeof (existing as any).incoming_docs === 'object'
+    ? (existing as any).incoming_docs
+    : {};
+
+  for (const key of detectedDocs) {
+    incoming[key] = {
+      received: true,
+      at: nowIso,
+      source_inbox_email_id: inserted.id,
+      from: fromEmail || null,
+      subject,
+    };
+  }
+
+  await supabaseAdmin
+    .from('transactions')
+    .update({
+      incoming_docs: incoming,
+      incoming_docs_updated_at: nowIso,
+    })
+    .eq('id', tx.id);
+}
 
     // 3) Extract (A) title facts and (B) lawyer additions/flags
     const [titleFacts, lawyer] = await Promise.all([
