@@ -123,6 +123,10 @@ const reqDraftDone =
   !!tx?.requisition_letter_generated_at;
 
 const requiresStatusCert = !!tx?.requires_status_cert;
+const reqSentToVendor =
+  tx?.workflow_status === 'REQUISITION_SENT_TO_VENDOR' ||
+  !!(tx as any)?.requisition_sent_to_vendor_at;
+
 
 // --- workflow rank helper (so DONE status works even if workflow isn't perfectly linear)
 const workflowRank: Record<string, number> = {
@@ -235,6 +239,43 @@ if (requiresStatusCert) {
     label: 'Status certificate required',
     status: 'PENDING',
     detail: 'Upload & review status certificate',
+  });
+}
+
+if (reqSentToVendor) {
+  rows.push(
+    { key: 'incoming_docs_header', label: 'Incoming docs (pre-closing)', status: 'PENDING' as any, detail: 'Auto-tracked from vendor solicitor emails' as any }
+  );
+
+  const incoming = (tx as any)?.incoming_docs && typeof (tx as any).incoming_docs === 'object'
+    ? (tx as any).incoming_docs
+    : {};
+
+  const has = (k: string) => !!incoming?.[k]?.received;
+
+  const docRows = [
+    { key: 'reply_to_requisitions', label: 'Reply to requisitions' },
+    { key: 'statement_of_adjustments', label: 'Statement of Adjustments' },
+    { key: 'closing_documents', label: 'Closing documents' },
+    { key: 'hst', label: 'HST' },
+    { key: 'stat_dec_residency', label: 'Statutory Declaration – residency' },
+    { key: 'stat_dec_spousal', label: 'Statutory Declaration – spousal status' },
+    { key: 'undertakings', label: 'Undertakings' },
+    { key: 'uff_warranty', label: 'UFF Warranty' },
+    { key: 'bill_of_sale', label: 'Bill of Sale' },
+    { key: 'doc_registration_agreement', label: 'Document registration agreement' },
+    { key: 'signature_required', label: 'Signature required' },
+    { key: 'lawyers_undertaking_vendor_mortgage', label: "Lawyer's Undertaking – vendor mortgage" },
+    { key: 'payout_statement_mortgage', label: 'Payout statement of mortgage' },
+  ];
+
+  docRows.forEach((d) => {
+    rows.push({
+      key: `incoming_${d.key}`,
+      label: d.label,
+      status: has(d.key) ? 'DONE' : 'PENDING',
+      detail: has(d.key) ? 'Received via inbound email' : undefined,
+    });
   });
 }
 
